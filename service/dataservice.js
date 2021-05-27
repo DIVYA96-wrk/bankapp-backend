@@ -36,11 +36,12 @@ const register=  (acc,use,pass) =>{
 
  
 
-const login= (acc,use,pass) => {
+const login= (req,acc,use,pass) => {
   var users= userdetails;
   if(acc in users)
   {
       if(use==users[acc]["username"] && pass==users[acc]["password"]){
+        req.session.currentUser=users[acc];
         
         return {
           statusCode:200,
@@ -73,6 +74,8 @@ const login= (acc,use,pass) => {
 };
 
 const withdraw= (acc,use,pass,amt)=>{
+
+
   
   var amount=parseInt(amt);
   let user=userdetails;
@@ -111,9 +114,11 @@ const withdraw= (acc,use,pass,amt)=>{
 
 }
 const deposit= (acc,use,pass,amt)=>{
+
   
   var amount=parseInt(amt) ;
   let user=userdetails;
+ 
   if(acc in user)
   {
     if(pass==user[acc]["password"] && use==user[acc]["username"]){
@@ -137,7 +142,7 @@ const deposit= (acc,use,pass,amt)=>{
         return {
           statusCode:422,
             status: false, 
-            message:"Invalid account number"}}
+            message:"Invalid account number"}}  
       
   
 
