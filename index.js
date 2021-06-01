@@ -27,7 +27,6 @@ const authMiddleware = (req, res, next) => {
             status: false,
             message: "Please LOG IN"
         })
-
     }
     next();
 };
@@ -44,19 +43,19 @@ app.post('/register', (req, res) => {
 }
 );
 app.post('/login', (req, res) => {
-    const result = dataservice.login(req, req.body.acc, req.body.use, req.body.pass);
-    res.status(result.statusCode).json(result)
+    dataservice.login(req, req.body.acc, req.body.use, req.body.pass)
+        .then(result => (res.status(result.statusCode).json(result)));
+    // res.status(result.statusCode).json(result)
 }
 );
 app.post('/withdraw', authMiddleware, (req, res) => {
-    const result = dataservice.withdraw(req.body.acc, req.body.use, req.body.pass, req.body.amt);
-    res.status(result.statusCode).json(result);
+    dataservice.withdraw(req.body.acc, req.body.use, req.body.pass, req.body.amt)
+        .then(result => (res.status(result.statusCode).json(result)));
 }
 );
 app.post('/deposit', authMiddleware, (req, res) => {
-
-    const result = dataservice.deposit(req.body.acc, req.body.use, req.body.pass, req.body.amt);
-    res.status(result.statusCode).json(result);
+    dataservice.deposit(req.body.acc, req.body.use, req.body.pass, req.body.amt)
+        .then(result => (res.status(result.statusCode).json(result)));
 }
 );
 

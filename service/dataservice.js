@@ -37,59 +37,63 @@ const register = (acno, use, pass) => {
 
 
 
-const login = (req, acc, use, pass) => {
-  var users = userdetails;
-  if (acc in users) {
-    if (use == users[acc]["username"] && pass == users[acc]["password"]) {
-      req.session.currentUser = users[acc];
+const login = (req, acno, use, password) => {
+  return db.User.findOne({ acno, password })
+    .then(user => {
 
-      return {
-        statusCode: 200,
-        status: true,
-        message: "login succesful"
+      if (user) {
 
-      }
-
-    }
-
-    else {
-      return {
-        statusCode: 422,
-        status: false,
-        message: "Invalid username or password"
-
-      }
-
-    }
-  }
-  else {
-    return {
-      statusCode: 422,
-      status: false,
-      message: "Invalid account number"
-
-    }
-
-  }
-};
-
-const withdraw = (acc, use, pass, amt) => {
-
-
-
-  var amount = parseInt(amt);
-  let user = userdetails;
-  if (acc in user) {
-    if (pass == user[acc]["password"] && use == user[acc]["username"]) {
-      if (user[acc]["balance"] >= amount) {
-        user[acc]["balance"] -= amount;
+        req.session.currentUser = user;
 
         return {
           statusCode: 200,
           status: true,
-          message: "your account has been debited with amount " + amt + " and your available balance is " + user[acc]["balance"]
+          message: "login succesful"
+
+        }
+
+      }
+
+      else {
+        return {
+          statusCode: 422,
+          status: false,
+          message: "Invalid Credentials"
+
+        }
+
+      }
+    })
+};
+
+
+
+
+const withdraw = (acno, username, password, amt) => {
+
+  var amount = parseInt(amt);
+
+  return db.User.findOne({ acno, password, username })
+
+    .then(user => {
+      if (!user) {
+        return {
+          statusCode: 422,
+          status: false,
+          message: "Invalid Credinilas"
         }
       }
+      if (user["balance"] >= amount) {
+        user["balance"] -= amount;
+        user.save();
+        return {
+          statusCode: 200,
+          status: true,
+          message: "your account has been debited with amount " + amt + " and your available balance is " + user["balance"]
+        }
+
+      }
+
       else {
         return {
           statusCode: 422,
@@ -98,70 +102,44 @@ const withdraw = (acc, use, pass, amt) => {
         }
       }
     }
-
-    else {
-      return {
-        statusCode: 422,
-        status: false,
-        message: "Invalid username or password"
-      }
-    }
-  }
-
-
-  else {
-    return {
-      statusCode: 422,
-      status: false,
-      message: "Invalid account number"
-    }
-  }
+    )
+};
 
 
 
 
-}
-const deposit = (acc, use, pass, amt) => {
+
+
+
+const deposit = (acno, username, password, amt) => {
 
 
   var amount = parseInt(amt);
-  let user = userdetails;
+  return db.User.findOne({ acno, username, password })
+    .then(user => {
 
-  if (acc in user) {
-    if (pass == user[acc]["password"] && use == user[acc]["username"]) {
-      user[acc]["balance"] += amount;
+      if (!user) {
+        return {
+          statusCode: 422,
+          status: false,
+          message: "Invalid CREDINIALS"
+        }
+      }
+
+      user["balance"] += amount;
+      user.save();
 
       return {
         statusCode: 200,
         status: true,
-        message: "your account has been credited with amount " + amt + " and your available balance is " + user[acc]["balance"]
+        message: "your account has been credited with amount " + amt + " and your available balance is " + user["balance"]
       }
-    }
 
 
-
-    else {
-      return {
-        statusCode: 422,
-        status: false,
-        message: "Invalid username or password"
-      }
-    }
-  }
+    })
+};
 
 
-  else {
-    return {
-      statusCode: 422,
-      status: false,
-      message: "Invalid account number"
-    }
-  }
-
-
-
-
-}
 
 module.exports = { register, login, withdraw, deposit };
 
