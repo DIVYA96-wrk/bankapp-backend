@@ -1,9 +1,13 @@
 const session = require("express-session")
 const express = require("express");
 const dataservice = require("./service/dataservice");
-const { User } = require("./service/db");
+const cors = require('cors')
 const app = express();
 app.use(express.json());
+app.use(cors({
+    origin: 'http://localhost:4200',
+    credentials: true
+}));
 app.use(session({
     secret: 'randomsecurestring',
     resave: false,
@@ -29,6 +33,7 @@ const authMiddleware = (req, res, next) => {
         })
     }
     next();
+
 };
 
 
@@ -49,12 +54,12 @@ app.post('/login', (req, res) => {
 }
 );
 app.post('/withdraw', authMiddleware, (req, res) => {
-    dataservice.withdraw(req.body.acc, req.body.use, req.body.pass, req.body.amt)
+    dataservice.withdraw(req, req.body.acc, req.body.pass, req.body.amt)
         .then(result => (res.status(result.statusCode).json(result)));
 }
 );
 app.post('/deposit', authMiddleware, (req, res) => {
-    dataservice.deposit(req.body.acc, req.body.use, req.body.pass, req.body.amt)
+    dataservice.deposit(req.body.acc, req.body.pass, req.body.amt)
         .then(result => (res.status(result.statusCode).json(result)));
 }
 );

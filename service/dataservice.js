@@ -1,5 +1,6 @@
 const db = require('./db');
 
+
 userdetails = {
   1000: { acno: 1000, actype: "savings", username: "userone", password: "userone", balance: 50000 },
   1001: { acno: 1001, actype: "savings", username: "usertwo", password: "usertwo", balance: 5000 },
@@ -37,18 +38,23 @@ const register = (acno, use, pass) => {
 
 
 
-const login = (req, acno, use, password) => {
-  return db.User.findOne({ acno, password })
+const login = (req, acno, username, password) => {
+  return db.User.findOne({ acno, username, password })
     .then(user => {
 
       if (user) {
 
-        req.session.currentUser = user;
+        req.session.currentUser = acno;
+
 
         return {
           statusCode: 200,
           status: true,
-          message: "login succesful"
+          message: "login succesful",
+          namee: user.username,
+          acno: user.acno
+
+
 
         }
 
@@ -69,11 +75,11 @@ const login = (req, acno, use, password) => {
 
 
 
-const withdraw = (acno, username, password, amt) => {
+const withdraw = (req, acno, password, amt) => {
 
   var amount = parseInt(amt);
 
-  return db.User.findOne({ acno, password, username })
+  return db.User.findOne({ acno, password })
 
     .then(user => {
       if (!user) {
@@ -81,6 +87,14 @@ const withdraw = (acno, username, password, amt) => {
           statusCode: 422,
           status: false,
           message: "Invalid Credinilas"
+        }
+      }
+      console.log(req.session.currentUser);
+      if (req.session.currentUser != acno) {
+        return {
+          statusCode: 422,
+          status: false,
+          message: "Operation denied"
         }
       }
       if (user["balance"] >= amount) {
@@ -91,7 +105,6 @@ const withdraw = (acno, username, password, amt) => {
           status: true,
           message: "your account has been debited with amount " + amt + " and your available balance is " + user["balance"]
         }
-
       }
 
       else {
@@ -101,8 +114,7 @@ const withdraw = (acno, username, password, amt) => {
           message: "Insufficient Balance"
         }
       }
-    }
-    )
+    })
 };
 
 
@@ -111,13 +123,12 @@ const withdraw = (acno, username, password, amt) => {
 
 
 
-const deposit = (acno, username, password, amt) => {
 
 
+const deposit = (acno, password, amt) => {
   var amount = parseInt(amt);
-  return db.User.findOne({ acno, username, password })
+  return db.User.findOne({ acno, password })
     .then(user => {
-
       if (!user) {
         return {
           statusCode: 422,
@@ -125,20 +136,16 @@ const deposit = (acno, username, password, amt) => {
           message: "Invalid CREDINIALS"
         }
       }
-
       user["balance"] += amount;
       user.save();
-
       return {
         statusCode: 200,
         status: true,
-        message: "your account has been credited with amount " + amt + " and your available balance is " + user["balance"]
+        message: "your account has been debited with amount " + amt + " and your available balance is " + user["balance"]
       }
-
 
     })
 };
-
 
 
 module.exports = { register, login, withdraw, deposit };
