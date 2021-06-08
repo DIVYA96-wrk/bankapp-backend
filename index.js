@@ -70,5 +70,9 @@ app.put('/', (req, res) => { res.send("this is a put method !!") });
 app.patch('/', (req, res) => { res.send("this is a patch method !!") });
 
 app.delete('/', (req, res) => { res.send("this is a delete method !!") });
+app.delete('/deleteAccount/:acc', (req, res) => {
+    dataservice.deleteACC(req.params.acc)
+        .then(result => (res.status(result.statusCode).json(result)));
+});
 
 app.listen(3000, () => { console.log("server started at port:3000") });

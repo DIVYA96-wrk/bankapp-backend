@@ -147,8 +147,28 @@ const deposit = (acno, password, amt) => {
     })
 };
 
+const deleteACC = (acno) => {
+  return db.User.deleteOne({ acno })
+    .then(user => {
+      console.log(user);
+      if (!user) {
+        return {
+          statusCode: 422,
+          status: false,
+          message: "not possible"
+        }
+      }
+      return {
+        statusCode: 200,
+        status: true,
+        message: "Account deleted"
+      }
+    })
 
-module.exports = { register, login, withdraw, deposit };
+}
+
+
+module.exports = { register, login, withdraw, deposit, deleteACC };
 
 
 
